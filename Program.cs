@@ -6,8 +6,8 @@
         {
             MySqlConnect conn = new MySqlConnect();
             conn.connect();
-            DalPeople pepole = new DalPeople(conn);
-            pepole.SendReport("kjhkjh");
+            DalPeople people = new DalPeople(conn);
+            DalPeople.InputCodeName("isgfg");
         }
     }
 }
