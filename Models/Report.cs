@@ -1,6 +1,6 @@
 namespace Malshinon.models
 {
-    class IntelReportsTable
+    class Report
     {
         public int _id { get; set; }
         public int _malshinId { get; set; }
@@ -9,7 +9,7 @@ namespace Malshinon.models
         public string _reportText { get; set; }
     
 
-        public IntelReportsTable(int MAl, int TAR, string ST, string RT, int ID = 0)
+        public Report(int MAl, int TAR,  string RT, string ST , int ID)
         {
             _malshinId = MAl;
             _targetId = TAR;

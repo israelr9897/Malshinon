@@ -1,6 +1,6 @@
 namespace Malshinon.models
 {
-    class PeoplesTable
+    public class People
     {
         public int _id { get; set; }
         public string _firstName { get; set; }
@@ -10,7 +10,7 @@ namespace Malshinon.models
         public int _num_reports { get; set; }
         public int _num_mentions { get; set; }
 
-        public PeoplesTable(string FN, string LN, string CD, string type, int NR, int NM, int  ID = 0)
+        public People(string FN, string LN, string CD, string type, int NR, int NM, int  ID = 0)
         {
             _firstName = FN;
             _lastName = LN;

@@ -3,7 +3,7 @@ using MySql.Data.MySqlClient;
 
 namespace Malshinon.models
 {
-    class MySqlConnect
+    public class MySqlConnect
     {
         string connectString = "Server=localhost;Database=Malshinon;User=root;Password='';";
         MySqlConnection connection;
@@ -38,7 +38,7 @@ namespace Malshinon.models
             return null;
         }
 
-        public void Disconnet()
+        public void Disconnect()
         {
             connection.Close();
         }
