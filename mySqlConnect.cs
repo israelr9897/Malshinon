@@ -28,7 +28,10 @@ namespace Malshinon.models
         {
             try
             {
-                connection.Open();
+                if (connection.State == System.Data.ConnectionState.Closed)
+                {
+                    connection.Open();
+                }
                 return connection;
             }
             catch (MySqlException ex)

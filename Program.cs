@@ -7,7 +7,8 @@
             MySqlConnect conn = new MySqlConnect();
             conn.connect();
             DalPeople people = new DalPeople(conn);
-            DalPeople.InputCodeName("isgfg");
+            DalReport report = new DalReport(conn);
+            DalPeople.InputCodeName();
         }
     }
 }
