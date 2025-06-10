@@ -4,7 +4,6 @@ namespace Malshinon.models
 {
     public class Functions
     {
-        static MySqlConnect _MySql = DalPeople._MySql;  
         static public string CreateType(string type, string codeName)
         {
             string peopleType = DalPeople.FindPeopleByCN(codeName)._type;
@@ -27,33 +26,51 @@ namespace Malshinon.models
             string codeName = FN[0].ToString() + FN[^1].ToString() + LN[0].ToString() + LN[^1].ToString();
             return codeName;
         }
-        static public bool IsTarget(string codeName)
+
+
+        static public int CheckSomeBigReport(int id)
         {
-            try
+            int numBigReport = 0;
+            foreach (var report in DalReport.FindAllReports())
             {
-                MySqlConnection conn = _MySql.GetConnect();
-                var cmd = new MySqlCommand("SELECT codeName FROM peoples", conn);
-                var reader = cmd.ExecuteReader();
-                while (reader.Read())
+                if (report._malshinId == id && CheckLengthReport(report) >= 100)
                 {
-                    if (reader.GetString("codeName") == codeName)
-                    {
-                        if ((reader.GetString("type") == "target") || (reader.GetString("type") == "both"))
-                        {
-                            return true;
-                        }
-                    }
+                    numBigReport += 1;
                 }
             }
-            catch (MySqlException ex)
-            {
-                System.Console.WriteLine($"Error: {ex.Message}");
-            }
-            finally
-            {
-                _MySql.Disconnect();
-            }
-            return false;
+            return numBigReport;
         }
+        static public int CheckLengthReport(Report report)
+        {
+            return report._reportText.Length;
+        }
+        // static public bool IsTarget(string codeName)
+        // {
+        //     try
+        //     {
+        //         MySqlConnection conn = _MySql.GetConnect();
+        //         var cmd = new MySqlCommand("SELECT codeName FROM peoples", conn);
+        //         var reader = cmd.ExecuteReader();
+        //         while (reader.Read())
+        //         {
+        //             if (reader.GetString("codeName") == codeName)
+        //             {
+        //                 if ((reader.GetString("type") == "target") || (reader.GetString("type") == "both"))
+        //                 {
+        //                     return true;
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     catch (MySqlException ex)
+        //     {
+        //         System.Console.WriteLine($"Error: {ex.Message}");
+        //     }
+        //     finally
+        //     {
+        //         _MySql.Disconnect();
+        //     }
+        //     return false;
+        // }
     }
 }

@@ -18,7 +18,6 @@ namespace Malshinon.models
             System.Console.WriteLine("Enter the full name of the target (Put a space only between first name and last name.). - ");
             string fullName = Console.ReadLine();
             string firstName = fullName.Split(" ")[0];
-            System.Console.WriteLine("Enter the last name of the target. - ");
             string lastName = fullName.Split(" ")[1];
             System.Console.WriteLine("Enter your report text - ");
             string text = Console.ReadLine();
@@ -27,10 +26,26 @@ namespace Malshinon.models
             {
                 DalPeople.AddPeople(firstName, lastName, "target");
             }
-            int targetId = DalPeople.FindPeopleByCN(codeName)._id;
-            SendReport(targetId, text, malshinId);
-            DalPeople.UpdateType("t", codeName, targetId);
-            DalPeople.UpdateNum("t", codeName, targetId);
+            People target = DalPeople.FindPeopleByCN(codeName);
+            SendReport(target._id, text, malshinId);
+            string timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+            string timeSub15 = DateTime.Now.AddMinutes(-15).ToString("yyyy-MM-dd HH:mm");
+            bool NumReportsIn15Min = CheckNumReportsIn15Min(timeNow, timeSub15) >= 3;
+            System.Console.WriteLine(NumReportsIn15Min);
+            DalPeople.UpdateType("t", codeName, target._id);
+            DalPeople.UpdateNumReport(codeName, target._id);
+            string reason10Times = "";
+            string reason3TimesIn15Min = "";
+            if (target._num_reports + 1 >= 20)
+            {
+                reason10Times = "This target has been reported over 10 times.";
+                System.Console.WriteLine(reason10Times);
+            }
+            if (NumReportsIn15Min)
+            {
+                reason3TimesIn15Min = "For this purpose, 3 reports were reported in 15 minutes.";
+                System.Console.WriteLine(reason3TimesIn15Min);
+            }
         }
 
         static void SendReport(int ID, string TX, int MID)
@@ -54,5 +69,69 @@ namespace Malshinon.models
                 _MySql.Disconnect();
             }
         }
+
+        static public Report FindReportById(int id)
+        {
+            foreach (var report in FindAllReports())
+            {
+                if (report._id == id)
+                {
+                    return report;
+                }
+            }
+            return null;
+        }
+
+        static public int CheckNumReportsIn15Min(string time, string timeSub15)
+        {
+            int count = 0;
+            try
+            {
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand($"SELECT COUNT(*)c FROM `intelReports` WHERE `stemptime` BETWEEN '{timeSub15}' and '{time}';", conn);
+                var reader = cmd.ExecuteReader();
+                reader.Read();
+                count = reader.GetInt32("c");
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+            return count;
+        }
+        static public List<Report> FindAllReports()
+                {
+                    List<Report> reportsList = new List<Report>();
+                    try
+                    {
+                        MySqlConnection conn = _MySql.GetConnect();
+                        var cmd = new MySqlCommand("SELECT * FROM intelReports;", conn);
+                        var reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            reportsList.Add(new Report(
+                                reader.GetInt32("malshinId"),
+                                reader.GetInt32("targetId"),
+                                reader.GetString("reportText"),
+                                reader.GetDateTime("stemptime"),
+                                reader.GetInt32("id")
+                            ));
+                        }
+                    }
+                    catch (MySqlException ex)
+                    {
+                        System.Console.WriteLine($"Error: {ex.Message}");
+                    }
+                    finally
+                    {
+                        _MySql.Disconnect();
+                    }
+                    return reportsList;
+                }
+        
     }
 }

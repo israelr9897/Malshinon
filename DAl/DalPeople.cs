@@ -12,7 +12,6 @@ namespace Malshinon.models
 
         static public void InputCodeName()
         {
-            int reporterId;
             System.Console.WriteLine("Enter Your name code - ");
             string codeName = Console.ReadLine();
             if (!IsTherePeople(codeName))
@@ -23,21 +22,63 @@ namespace Malshinon.models
                 string firstName = fullName.Split(" ")[0];
                 // System.Console.WriteLine("Enter Your last name - ");
                 string lastName = fullName.Split(" ")[1];
-                People reporter = AddPeople(firstName, lastName, "reporter");
-                codeName = reporter._codeName;
-                reporterId = reporter._id;
+                People p = AddPeople(firstName, lastName, "reporter");
+                codeName = p._codeName;
+
             }
-            else
+            People reporter = FindPeopleByCN(codeName);
+            DalReport.DataToReport(reporter._id);
+            UpdateType("r", reporter._codeName, reporter._id);
+            UpdateNumMentions(reporter._codeName, reporter._id);
+            bool TenWithHundred = Functions.CheckSomeBigReport(reporter._id) >= 10;
+            if (TenWithHundred)
             {
-                reporterId = FindPeopleByCN(codeName)._id;
+                UpdatetoPotentialAgent(reporter._id);
             }
-            DalReport.DataToReport(reporterId);
-            UpdateType("r", codeName, reporterId);
-            UpdateNum("r", codeName, reporterId);
+            
 
 
         }
 
+        static public void UpdatetoPotentialAgent(int id)
+        {
+            MySqlConnection conn = _MySql.GetConnect();
+            var cmd = new MySqlCommand($"UPDATE peoples SET type = 'potential_agent' WHERE id = @id", conn);
+            cmd.Parameters.AddWithValue(@"id", id);
+            cmd.ExecuteNonQuery();
+        }
+
+        static List<People> FindAllPeoples()
+        {
+            List<People> peopleList = new List<People>();
+            try
+            {
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand("SELECT * FROM peoples;", conn);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    peopleList.Add(new People(
+                        reader.GetString("firstName"),
+                        reader.GetString("lastName"),
+                        reader.GetString("codeName"),
+                        reader.GetString("type"),
+                        reader.GetInt32("num_reports"),
+                        reader.GetInt32("num_mentions"),
+                        reader.GetInt32("id")
+                    ));
+                }
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+            return peopleList;
+        }
         static public void UpdateType(string type, string codeName, int id)
         {
             try
@@ -51,33 +92,50 @@ namespace Malshinon.models
             }
             catch (System.Exception ex)
             {
-                
+
                 System.Console.WriteLine(ex.Message);
             }
         }
 
-        static public void UpdateNum(string type, string codeName, int id)
+        static public int CheckNumMentions(string codeName)
+        {
+            return FindPeopleByCN(codeName)._num_mentions;
+        }
+        static public int CheckNumReports(string codeName)
+        {
+            return FindPeopleByCN(codeName)._num_reports;
+        }
+
+        static public void UpdateNumReport(string codeName, int id)
         {
             try
             {
-                if (type == "r")
-                {
-                    int numMentions = FindPeopleByCN(codeName)._num_mentions + 1;
-                    MySqlConnection conn = _MySql.GetConnect();
-                    var cmd = new MySqlCommand($"UPDATE peoples SET num_mentions = @num_mentions WHERE id = @id", conn);
-                    cmd.Parameters.AddWithValue("@num_mentions", numMentions);
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.ExecuteNonQuery();
-                }
-                else
-                {
-                    int numReports = FindPeopleByCN(codeName)._num_reports + 1;
-                    MySqlConnection conn = _MySql.GetConnect();
-                    var cmd = new MySqlCommand($"UPDATE peoples SET num_reports = @num_reports WHERE id = @id", conn);
-                    cmd.Parameters.AddWithValue("@num_reports", numReports);
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.ExecuteNonQuery();
-                }
+                int numReports = CheckNumReports(codeName) + 1;
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand($"UPDATE peoples SET num_reports = @num_reports WHERE id = @id", conn);
+                cmd.Parameters.AddWithValue("@num_reports", numReports);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+        }
+        static public void UpdateNumMentions(string codeName, int id)
+        {
+            try
+            {
+                int numMentions = CheckNumMentions(codeName) + 1;
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand($"UPDATE peoples SET num_mentions = @num_mentions WHERE id = @id", conn);
+                cmd.Parameters.AddWithValue("@num_mentions", numMentions);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
             }
             catch (MySqlException ex)
             {
