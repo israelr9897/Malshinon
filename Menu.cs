@@ -11,14 +11,45 @@ namespace Malshinon.models
             new DalPeople(conn);
             new DalReport(conn);
             new DalAlerts(conn);
-            Console.ForegroundColor = ConsoleColor.Green;
-            System.Console.WriteLine("------  Welcome  ------");
-            Console.ForegroundColor = ConsoleColor.White;
 
-            MainMenu();
+            ChoiceUser();
         }
 
-        static void MainMenu()
+        public static void ChoiceUser()
+        {
+            bool isExit = false;
+            while (!isExit)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                System.Console.WriteLine("\n------  Welcome  ------\n");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                System.Console.WriteLine("Please choose from the following options - ");
+                System.Console.WriteLine("1. Add a reporter");
+                System.Console.WriteLine("2. See all potential reporters for agents");
+                System.Console.WriteLine("0. Exit");
+                Console.ForegroundColor = ConsoleColor.White;
+                string choice = Console.ReadLine();
+                switch (choice)
+                {
+                    case "1":
+                        AddComment();
+                        break;
+
+                    case "2":
+                        ShowPotentialAgent();
+                        break;
+
+                    case "0":
+                        isExit = true;
+                        break;
+
+                }
+            }
+
+
+        }
+
+        static void AddComment()
         {
             string codeName = Functions.InputCodeName();
             string targetFullName = Functions.InputFullNameToTarget();
@@ -31,7 +62,11 @@ namespace Malshinon.models
             DalPeople.UpdateType(Functions.ReturnTypeToReporter(reporter._type, reporter._num_mentions), reporter._codeName);
             DalPeople.UpdateType(Functions.ReturnTypeToTarget(target._type), target._codeName);
             Functions.Alerts(target);
+        }
 
+        static void ShowPotentialAgent()
+        {
+            Functions.ShowpotentialAgent();
         }
     }
 }

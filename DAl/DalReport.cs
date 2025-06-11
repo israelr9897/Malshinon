@@ -19,7 +19,9 @@ namespace Malshinon.models
                 cmd.Parameters.AddWithValue("@targetId", ID);
                 cmd.Parameters.AddWithValue("@reportText", TX);
                 cmd.ExecuteNonQuery();
-                System.Console.WriteLine("Report sent successfully.");
+                Console.ForegroundColor = ConsoleColor.Blue;
+                System.Console.WriteLine(" ---- Report sent successfully ----\n");
+                Console.ForegroundColor = ConsoleColor.White;
             }
             catch (MySqlException ex)
             {
@@ -33,14 +35,46 @@ namespace Malshinon.models
 
         static public Report FindReportById(int id)
         {
-            foreach (var report in FindAllReports())
+            try
             {
-                if (report._id == id)
-                {
-                    return report;
-                }
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand($"SELECT * FROM intelReports WHERE id = {id};", conn);
+                var reader = cmd.ExecuteReader();
+                reader.Read();
+                return ReturnObjReport(reader);
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
             }
             return null;
+        }
+        static public List<Report> FindReportsByMalshinId(int id)
+        {
+            List<Report> listReport = new List<Report>();
+            try
+            {
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand($"SELECT * FROM intelReports WHERE malshinId = {id};", conn);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    listReport.Add(ReturnObjReport(reader));
+                }
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+            return listReport;
         }
 
         static public int CheckNumReportsIn15Min(int id, string time, string timeSub15)
@@ -74,13 +108,7 @@ namespace Malshinon.models
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    reportsList.Add(new Report(
-                        reader.GetInt32("malshinId"),
-                        reader.GetInt32("targetId"),
-                        reader.GetString("reportText"),
-                        reader.GetDateTime("stemptime"),
-                        reader.GetInt32("id")
-                    ));
+                    reportsList.Add(ReturnObjReport(reader));
                 }
             }
             catch (MySqlException ex)
@@ -92,6 +120,17 @@ namespace Malshinon.models
                 _MySql.Disconnect();
             }
             return reportsList;
+        }
+        static public Report ReturnObjReport(MySqlDataReader reader)
+        {
+            Report report = new Report(
+                reader.GetInt32("malshinId"),
+                reader.GetInt32("targetId"),
+                reader.GetString("reportText"),
+                reader.GetDateTime("stemptime"),
+                reader.GetInt32("id")
+            );
+            return report;
         }
     }
 }

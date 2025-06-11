@@ -18,7 +18,7 @@ namespace Malshinon.models
             cmd.ExecuteNonQuery();
         }
 
-        static List<People> GetAllPeoples()
+        static public List<People> GetAllPeoples()
         {
             List<People> peopleList = new List<People>();
             try
@@ -40,6 +40,29 @@ namespace Malshinon.models
                 _MySql.Disconnect();
             }
             return peopleList;
+        }
+        static public List<People> GetAllPotentialAgents()
+        {
+            List<People> potentialAgentsList = new List<People>();
+            try
+            {
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand("SELECT * FROM peoples WHERE type = 'potential_agent';", conn);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    potentialAgentsList.Add(ReturnObjPeople(reader));
+                }
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+            return potentialAgentsList;
         }
         static public void UpdateType(string type, string codeName)
         {
@@ -185,7 +208,6 @@ namespace Malshinon.models
                 cmd.Parameters.AddWithValue(@"lastName", lastName);
                 cmd.Parameters.AddWithValue(@"codeName", codeName);
                 cmd.ExecuteNonQuery();
-                System.Console.WriteLine("Your data has been saved in the system!");
                 return FindPeopleByCN(codeName);
             }
             catch (MySqlException ex)

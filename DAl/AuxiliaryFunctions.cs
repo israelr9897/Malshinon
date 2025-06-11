@@ -142,5 +142,30 @@ namespace Malshinon.models
         {
             return DateTime.Now.AddMinutes(-15).ToString("yyyy-MM-dd HH:mm");
         }
+        static public void ShowpotentialAgent()
+        {
+            List<People> potentialAgents = DalPeople.GetAllPotentialAgents();
+            foreach (var people in potentialAgents)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                System.Console.WriteLine("-----------------------");
+                System.Console.WriteLine($"name: {people._firstName} {people._lastName}");
+                // System.Console.WriteLine($"amount mentions: {people._num_mentions}");
+                System.Console.WriteLine($"amount reports: {people._num_reports}");
+                System.Console.WriteLine($"average length reports: {AverageLength(people._id)}");
+                System.Console.WriteLine("-----------------------\n");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+        }
+        static public double AverageLength(int id)
+        {
+            List<Report> listReports = DalReport.FindReportsByMalshinId(id);
+            int result = 0;
+            foreach (var report in listReports)
+            {
+                result += CheckLengthReport(report);
+            }
+            return result / listReports.Count;
+        }
     }
 }
