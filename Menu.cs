@@ -26,6 +26,8 @@ namespace Malshinon.models
                 System.Console.WriteLine("Please choose from the following options - ");
                 System.Console.WriteLine("1. Add a reporter");
                 System.Console.WriteLine("2. See all potential reporters for agents");
+                System.Console.WriteLine("3. See all dangers target");
+                System.Console.WriteLine("4. See List all active alerts");
                 System.Console.WriteLine("0. Exit");
                 Console.ForegroundColor = ConsoleColor.White;
                 string choice = Console.ReadLine();
@@ -37,6 +39,14 @@ namespace Malshinon.models
 
                     case "2":
                         ShowPotentialAgent();
+                        break;
+
+                    case "3":
+                        Functions.ShowDangersTarget();
+                        break;
+
+                    case "4":
+                        Functions.ShowAllAlerts();
                         break;
 
                     case "0":
