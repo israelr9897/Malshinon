@@ -17,11 +17,11 @@ namespace Malshinon.models
 
         public static void ChoiceUser()
         {
-            bool isExit = false;
-            while (!isExit)
+            bool Exit = false;
+            while (!Exit)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                System.Console.WriteLine("\n------  Welcome  ------\n");
+                System.Console.WriteLine("\n--------------  Welcome  --------------\n");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 System.Console.WriteLine("Please choose from the following options - ");
                 System.Console.WriteLine("1. Add a reporter");
@@ -29,6 +29,8 @@ namespace Malshinon.models
                 System.Console.WriteLine("3. See all dangers target");
                 System.Console.WriteLine("4. See List all active alerts");
                 System.Console.WriteLine("0. Exit");
+                Console.ForegroundColor = ConsoleColor.Green;
+                System.Console.WriteLine("\n---------------------------------------\n");
                 Console.ForegroundColor = ConsoleColor.White;
                 string choice = Console.ReadLine();
                 switch (choice)
@@ -38,7 +40,7 @@ namespace Malshinon.models
                         break;
 
                     case "2":
-                        ShowPotentialAgent();
+                        Functions.ShowpotentialAgent();
                         break;
 
                     case "3":
@@ -50,7 +52,12 @@ namespace Malshinon.models
                         break;
 
                     case "0":
-                        isExit = true;
+                        Exit = true;
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        System.Console.WriteLine("Please select a valid choice.");
+                        Console.ForegroundColor = ConsoleColor.White;
                         break;
 
                 }
@@ -72,11 +79,6 @@ namespace Malshinon.models
             DalPeople.UpdateType(Functions.ReturnTypeToReporter(reporter._type, reporter._num_mentions), reporter._codeName);
             DalPeople.UpdateType(Functions.ReturnTypeToTarget(target._type), target._codeName);
             Functions.Alerts(target);
-        }
-
-        static void ShowPotentialAgent()
-        {
-            Functions.ShowpotentialAgent();
         }
     }
 }

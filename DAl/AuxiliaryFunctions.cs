@@ -181,7 +181,7 @@ namespace Malshinon.models
         {
             foreach (var alert in DalAlerts.GetAllAlerts())
             {
-                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.ForegroundColor = ConsoleColor.DarkRed;
                 System.Console.WriteLine("-----------------------");
                 System.Console.WriteLine($"name: {alert._targetId} ");
                 System.Console.WriteLine($"create at: {alert._createdAt}");
