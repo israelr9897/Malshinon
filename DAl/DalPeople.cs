@@ -1,3 +1,4 @@
+using Microsoft.VisualBasic;
 using MySql.Data.MySqlClient;
 
 namespace Malshinon.models
@@ -9,37 +10,6 @@ namespace Malshinon.models
         {
             _MySql = mySql;
         }
-
-        static public void InputCodeName()
-        {
-            System.Console.WriteLine("Enter Your name code - ");
-            string codeName = Console.ReadLine();
-            if (!IsTherePeople(codeName))
-            {
-                System.Console.WriteLine("Your name code was not found\n");
-                System.Console.WriteLine("Enter Your full name (Put a space only between first name and last name.). - ");
-                string fullName = Console.ReadLine();
-                string firstName = fullName.Split(" ")[0];
-                // System.Console.WriteLine("Enter Your last name - ");
-                string lastName = fullName.Split(" ")[1];
-                People p = AddPeople(firstName, lastName, "reporter");
-                codeName = p._codeName;
-
-            }
-            People reporter = FindPeopleByCN(codeName);
-            DalReport.DataToReport(reporter._id);
-            UpdateType("r", reporter._codeName, reporter._id);
-            UpdateNumMentions(reporter._codeName, reporter._id);
-            bool TenWithHundred = Functions.CheckSomeBigReport(reporter._id) >= 10;
-            if (TenWithHundred)
-            {
-                UpdatetoPotentialAgent(reporter._id);
-            }
-            
-
-
-        }
-
         static public void UpdatetoPotentialAgent(int id)
         {
             MySqlConnection conn = _MySql.GetConnect();
@@ -48,7 +18,7 @@ namespace Malshinon.models
             cmd.ExecuteNonQuery();
         }
 
-        static List<People> FindAllPeoples()
+        static List<People> GetAllPeoples()
         {
             List<People> peopleList = new List<People>();
             try
@@ -58,15 +28,7 @@ namespace Malshinon.models
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    peopleList.Add(new People(
-                        reader.GetString("firstName"),
-                        reader.GetString("lastName"),
-                        reader.GetString("codeName"),
-                        reader.GetString("type"),
-                        reader.GetInt32("num_reports"),
-                        reader.GetInt32("num_mentions"),
-                        reader.GetInt32("id")
-                    ));
+                    peopleList.Add(ReturnObjPeople(reader));
                 }
             }
             catch (MySqlException ex)
@@ -79,15 +41,14 @@ namespace Malshinon.models
             }
             return peopleList;
         }
-        static public void UpdateType(string type, string codeName, int id)
+        static public void UpdateType(string type, string codeName)
         {
             try
             {
-                string newType = Functions.CreateType(type, codeName);
                 MySqlConnection conn = _MySql.GetConnect();
-                var cmd = new MySqlCommand($"UPDATE peoples SET type = @type WHERE id = @id", conn);
-                cmd.Parameters.AddWithValue(@"type", newType);
-                cmd.Parameters.AddWithValue(@"id", id);
+                var cmd = new MySqlCommand($"UPDATE peoples SET type = @type WHERE codeName = @codeName", conn);
+                cmd.Parameters.AddWithValue(@"type", type);
+                cmd.Parameters.AddWithValue(@"codeName", codeName);
                 cmd.ExecuteNonQuery();
             }
             catch (System.Exception ex)
@@ -97,23 +58,13 @@ namespace Malshinon.models
             }
         }
 
-        static public int CheckNumMentions(string codeName)
-        {
-            return FindPeopleByCN(codeName)._num_mentions;
-        }
-        static public int CheckNumReports(string codeName)
-        {
-            return FindPeopleByCN(codeName)._num_reports;
-        }
-
-        static public void UpdateNumReport(string codeName, int id)
+        static public void UpdateNumReport(int num, int id)
         {
             try
             {
-                int numReports = CheckNumReports(codeName) + 1;
                 MySqlConnection conn = _MySql.GetConnect();
                 var cmd = new MySqlCommand($"UPDATE peoples SET num_reports = @num_reports WHERE id = @id", conn);
-                cmd.Parameters.AddWithValue("@num_reports", numReports);
+                cmd.Parameters.AddWithValue("@num_reports", num +1);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
             }
@@ -126,14 +77,13 @@ namespace Malshinon.models
                 _MySql.Disconnect();
             }
         }
-        static public void UpdateNumMentions(string codeName, int id)
+        static public void UpdateNumMentions(int num, int id)
         {
             try
             {
-                int numMentions = CheckNumMentions(codeName) + 1;
                 MySqlConnection conn = _MySql.GetConnect();
                 var cmd = new MySqlCommand($"UPDATE peoples SET num_mentions = @num_mentions WHERE id = @id", conn);
-                cmd.Parameters.AddWithValue("@num_mentions", numMentions);
+                cmd.Parameters.AddWithValue("@num_mentions", num +1);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
             }
@@ -167,6 +117,40 @@ namespace Malshinon.models
             return false;
         }
 
+        static public People ReturnObjPeople(MySqlDataReader reader)
+        {
+            People people = new People(
+                reader.GetString("firstName"),
+                reader.GetString("lastName"),
+                reader.GetString("codeName"),
+                reader.GetString("type"),
+                reader.GetInt32("num_reports"),
+                reader.GetInt32("num_mentions"),
+                reader.GetInt32("id")
+            );
+            return people;
+        }
+
+        static public People FindPeopleById(int id)
+        {
+            try
+            {
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand($"SELECT * FROM peoples WHERE id = '{id}'", conn);
+                var reader = cmd.ExecuteReader();
+                reader.Read();
+                return ReturnObjPeople(reader);
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+            return null;
+        }
         static public People FindPeopleByCN(string codeName)
         {
             try
@@ -175,16 +159,7 @@ namespace Malshinon.models
                 var cmd = new MySqlCommand($"SELECT * FROM peoples WHERE codeName = '{codeName}'", conn);
                 var reader = cmd.ExecuteReader();
                 reader.Read();
-                People people = new People(
-                    reader.GetString("firstName"),
-                    reader.GetString("lastName"),
-                    reader.GetString("codeName"),
-                    reader.GetString("type"),
-                    reader.GetInt32("num_reports"),
-                    reader.GetInt32("num_mentions"),
-                    reader.GetInt32("id")
-                );
-                return people;
+                return ReturnObjPeople(reader);
             }
             catch (MySqlException ex)
             {
@@ -197,26 +172,21 @@ namespace Malshinon.models
             return null;
         }
 
-        static public People AddPeople(string FN, string LN, string TY)
+        static public People AddPeople(string fullName, string codeName)
         {
             try
             {
-                string firstName = FN;
-                string lastName = LN;
-                string newCodeName = Functions.CreatCodeName(firstName, lastName);
-                // string type = Functions.CreatType(newCodeName);
-                string type = TY;
-
+                string firstName = fullName.Split(" ")[0];
+                string lastName = fullName.Split(" ")[1];
                 MySqlConnection conn = _MySql.GetConnect();
 
-                var cmd = new MySqlCommand($"INSERT INTO peoples(firstName,lastName,codeName,type)VALUES(@firstName,@lastName,@codeName,@type)", conn);
+                var cmd = new MySqlCommand($"INSERT INTO peoples(firstName,lastName,codeName)VALUES(@firstName,@lastName,@codeName)", conn);
                 cmd.Parameters.AddWithValue(@"firstName", firstName);
                 cmd.Parameters.AddWithValue(@"lastName", lastName);
-                cmd.Parameters.AddWithValue(@"codeName", newCodeName);
-                cmd.Parameters.AddWithValue(@"type", type);
+                cmd.Parameters.AddWithValue(@"codeName", codeName);
                 cmd.ExecuteNonQuery();
                 System.Console.WriteLine("Your data has been saved in the system!");
-                return FindPeopleByCN(newCodeName);
+                return FindPeopleByCN(codeName);
             }
             catch (MySqlException ex)
             {

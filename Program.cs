@@ -4,12 +4,7 @@
     {
         static void Main(string[] args)
         {
-            MySqlConnect conn = new MySqlConnect();
-            conn.connect();
-            new DalPeople(conn);
-            new DalReport(conn);
-            new DalAlerts(conn);
-            DalPeople.InputCodeName();
+            Menu.MenuStart();
             
         }
     }
