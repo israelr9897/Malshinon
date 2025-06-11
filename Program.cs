@@ -8,6 +8,7 @@
             conn.connect();
             new DalPeople(conn);
             new DalReport(conn);
+            new DalAlerts(conn);
             DalPeople.InputCodeName();
             
         }

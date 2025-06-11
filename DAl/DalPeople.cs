@@ -152,15 +152,9 @@ namespace Malshinon.models
             try
             {
                 MySqlConnection conn = _MySql.GetConnect();
-                var cmd = new MySqlCommand("SELECT codeName FROM peoples", conn);
+                var cmd = new MySqlCommand($"SELECT codeName FROM peoples WHERE codeName = '{codeName}';", conn);
                 var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    if (reader.GetString("codeName") == codeName)
-                    {
-                        return true;
-                    }
-                }
+                return reader.Read();
             }
             catch (MySqlException ex)
             {

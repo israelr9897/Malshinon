@@ -30,20 +30,19 @@ namespace Malshinon.models
             SendReport(target._id, text, malshinId);
             string timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
             string timeSub15 = DateTime.Now.AddMinutes(-15).ToString("yyyy-MM-dd HH:mm");
-            bool NumReportsIn15Min = CheckNumReportsIn15Min(timeNow, timeSub15) >= 3;
-            System.Console.WriteLine(NumReportsIn15Min);
+            bool IsNumReportsIn15Min = CheckNumReportsIn15Min(timeNow, timeSub15) >= 3;
             DalPeople.UpdateType("t", codeName, target._id);
             DalPeople.UpdateNumReport(codeName, target._id);
-            string reason10Times = "";
-            string reason3TimesIn15Min = "";
+            string reason10Times = "This target has been reported over 10 times.";
+            string reason3TimesIn15Min = "For this purpose, 3 reports were reported in 15 minutes.";
             if (target._num_reports + 1 >= 20)
             {
-                reason10Times = "This target has been reported over 10 times.";
                 System.Console.WriteLine(reason10Times);
+                DalAlerts.AddAlerts(target._id, DateTime.Parse(timeNow), reason10Times);
             }
-            if (NumReportsIn15Min)
+            if (IsNumReportsIn15Min)
             {
-                reason3TimesIn15Min = "For this purpose, 3 reports were reported in 15 minutes.";
+                DalAlerts.AddAlerts(target._id, DateTime.Parse(timeNow), reason3TimesIn15Min);
                 System.Console.WriteLine(reason3TimesIn15Min);
             }
         }
