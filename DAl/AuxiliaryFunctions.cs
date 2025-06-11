@@ -46,7 +46,7 @@ namespace Malshinon.models
         static public int CheckSomeBigReport(int id)
         {
             int numBigReport = 0;
-            foreach (var report in DalReport.FindAllReports())
+            foreach (var report in DalReport.GetAllReports())
             {
                 if (report._malshinId == id && CheckLengthReport(report) >= 100)
                 {
@@ -144,14 +144,12 @@ namespace Malshinon.models
         }
         static public void ShowpotentialAgent()
         {
-            List<People> potentialAgents = DalPeople.GetAllPotentialAgents();
-            foreach (var people in potentialAgents)
+            foreach (var people in DalPeople.GetAllPotentialAgents())
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
                 System.Console.WriteLine("-----------------------");
                 System.Console.WriteLine($"name: {people._firstName} {people._lastName}");
-                // System.Console.WriteLine($"amount mentions: {people._num_mentions}");
-                System.Console.WriteLine($"amount reports: {people._num_reports}");
+                System.Console.WriteLine($"amount mentions: {people._num_mentions}");
                 System.Console.WriteLine($"average length reports: {AverageLength(people._id)}");
                 System.Console.WriteLine("-----------------------\n");
                 Console.ForegroundColor = ConsoleColor.White;
@@ -167,5 +165,31 @@ namespace Malshinon.models
             }
             return result / listReports.Count;
         }
+        static public void ShowDangersTarget()
+        {
+            foreach (var people in DalPeople.GetAllDangersTarget())
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                System.Console.WriteLine("-----------------------");
+                System.Console.WriteLine($"name: {people._firstName} {people._lastName}");
+                System.Console.WriteLine($"amount reports: {people._num_reports}");
+                System.Console.WriteLine("-----------------------\n");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+        }
+        static public void ShowAllAlerts()
+        {
+            foreach (var alert in DalAlerts.GetAllAlerts())
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                System.Console.WriteLine("-----------------------");
+                System.Console.WriteLine($"name: {alert._targetId} ");
+                System.Console.WriteLine($"create at: {alert._createdAt}");
+                System.Console.WriteLine($"reasons: {alert._reason}");
+                System.Console.WriteLine("-----------------------\n");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+        }
+
     }
 }

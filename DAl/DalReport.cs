@@ -98,7 +98,7 @@ namespace Malshinon.models
             }
             return count;
         }
-        static public List<Report> FindAllReports()
+        static public List<Report> GetAllReports()
         {
             List<Report> reportsList = new List<Report>();
             try

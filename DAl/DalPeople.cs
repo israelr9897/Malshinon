@@ -64,6 +64,29 @@ namespace Malshinon.models
             }
             return potentialAgentsList;
         }
+        static public List<People> GetAllDangersTarget()
+        {
+            List<People> DangersTargetList = new List<People>();
+            try
+            {
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand($"SELECT * FROM  peoples p INNER JOIN alerts a on a.targetId = p.id WHERE p.type = 'target' or p.type = 'both';", conn);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    DangersTargetList.Add(ReturnObjPeople(reader));
+                }
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+            return DangersTargetList;
+        }
         static public void UpdateType(string type, string codeName)
         {
             try

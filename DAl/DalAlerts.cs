@@ -1,3 +1,4 @@
+using System.Data;
 using MySql.Data.MySqlClient;
 
 namespace Malshinon.models
@@ -29,6 +30,40 @@ namespace Malshinon.models
             {
                 _MySql.Disconnect();
             }
+        }
+
+        static public List<Alerts> GetAllAlerts()
+        {
+            List<Alerts> alertsList = new List<Alerts>();
+            try
+            {
+                MySqlConnection conn = _MySql.GetConnect();
+                var cmd = new MySqlCommand("SELECT * FROM alerts;", conn);
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    alertsList.Add(ReturnObjAlert(reader));
+                }
+            }
+            catch (MySqlException ex)
+            {
+                System.Console.WriteLine($"Error: {ex.Message}");
+            }
+            finally
+            {
+                _MySql.Disconnect();
+            }
+            return alertsList;
+        }
+        static public Alerts ReturnObjAlert(MySqlDataReader reader)
+        {
+            Alerts alert = new Alerts(
+                reader.GetInt32("targetId"),
+                reader.GetDateTime("created_at"),
+                reader.GetString("reason"),
+                reader.GetInt32("id")
+            );
+            return alert;
         }
     }
 }
