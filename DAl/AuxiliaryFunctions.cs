@@ -66,7 +66,7 @@ namespace Malshinon.models
             if (!DalPeople.IsTherePeople(codeName))
             {
                 System.Console.WriteLine("Your name code was not found\n");
-                System.Console.WriteLine("Enter Your full name (Put a space only between first name and last name) - ");
+                System.Console.WriteLine("Enter Your full name - ");
                 string fullName = ChecksFullName();
                 string newCodeName = Functions.CreatCodeName(fullName);
                 DalPeople.AddPeople(fullName, newCodeName);
@@ -82,7 +82,7 @@ namespace Malshinon.models
         }
         static public string InputFullNameToTarget()
         {
-            Console.WriteLine("Enter the full name of the target (Put a space only between first name and last name.) - ");
+            Console.WriteLine("Enter the full name of the target - ");
             string fullName = ChecksFullName();
             string codeName = Functions.CreatCodeName(fullName);
             if (!DalPeople.IsTherePeople(codeName))
